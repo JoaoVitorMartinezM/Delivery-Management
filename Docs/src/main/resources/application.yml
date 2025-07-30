@@ -1,0 +1,12 @@
+server:
+  port: 9998
+spring.application:
+    name: docs
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: Courier Service
+        url: http://localhost:8081/v3/api-docs
+      - name: Delivery Service
+        url: http://localhost:8080/v3/api-docs
