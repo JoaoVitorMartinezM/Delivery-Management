@@ -4,8 +4,54 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
   datasource:
     url: jdbc:postgresql://localhost:5432/delivery
     username: postgres
     password: postgres
+
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping:
+          delivery-placed-event:com.devmarcelino.delivery.management.domain.event.DeliveryPlacedEvent,
+          delivery-pick-up-event:com.devmarcelino.delivery.management.domain.event.DeliveryPickUpEvent,
+          delivery-fulfilled-event:com.devmarcelino.delivery.management.domain.event.DeliveryFulfilledEvent
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+  instance:
+    instance-id: ${random.value}
+    prefer-ip-address: true
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50 
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 10000 
+    instances:
+      CircuitBreaker_CourierAPIClient_payoutCalculation:
+        baseConfig: default
+        waitDurationInOpenState: 5000
+  retry:
+    configs:
+      default:
+        max-attempts: 2
+        wait-duration: 20ms
+      instances:
+        Retry_CourierAPIClient_payoutCalculation:
+          baseConfig: default
+          max-attempts: 3
+          retryExceptions: 
+            - org.springframework.web.client.ResourceAccessException
+          ignoreExceptions:
+           - org.springframework.web.client.HttpServerErrorException

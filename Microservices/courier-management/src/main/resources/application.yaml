@@ -11,3 +11,24 @@ spring:
     url: jdbc:postgresql://localhost:5432/courier
     username: postgres
     password: postgres
+
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      group-id: teste
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: '*'
+        spring.json.type.mapping:
+          delivery-placed-event:com.devmarcelino.courier.management.infra.event.DeliveryPlacedIntegrationEvent,
+          delivery-fulfilled-event:com.devmarcelino.courier.management.infra.event.DeliveryFulfilledIntegrationEvent,
+          delivery-pick-up-event:com.fasterxml.jackson.databind.JsonNode
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+  instance:
+    instance-id: ${random.value}
+    prefer-ip-address: true
